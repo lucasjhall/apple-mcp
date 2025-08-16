@@ -14,6 +14,7 @@ struct apple_mcpApp: App {
 
     // Initialize the Networking Manager to handle HTTP server
     private let networkingManager = NetworkingManager.shared
+    private let remindersManager = RemindersManager.shared
 
     var body: some Scene {
         WindowGroup {
@@ -22,6 +23,15 @@ struct apple_mcpApp: App {
                 .onAppear {
                     // Start the HTTP server when the view appears
                     startHTTPServer()
+
+                    // Request access to reminders
+                    remindersManager.requestAccess { granted, error in
+                        if granted {
+                            print("Reminders access granted.")
+                        } else {
+                            print("Reminders access denied.")
+                        }
+                    }
                 }
         }
         .onChange(of: scenePhase) { newPhase in

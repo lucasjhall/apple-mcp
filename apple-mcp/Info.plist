@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSRemindersUsageDescription</key>
+	<string>This app needs to access your Reminders to manage your tasks.</string>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>This app needs to access your local network to serve the health check endpoint</string>
 	<key>NSBonjourServices</key>
