@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<intent-definition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://apple.com/DTDs/Intents.xsd">
+    <intent name="DeleteNote">
+        <title>Delete Note</title>
+        <description>Deletes a specific note.</description>
+        <parameters>
+            <parameter name="note" type="INNote"/>
+        </parameters>
+        <shortcut-types>
+            <shortcut-type>app</shortcut-type>
+        </shortcut-types>
+    </intent>
+    <intent name="INCreateNoteIntent" />
+    <intent name="INSearchForNotebookItemsIntent" />
+    <intent name="INAppendToNoteIntent" />
+</intent-definition>
