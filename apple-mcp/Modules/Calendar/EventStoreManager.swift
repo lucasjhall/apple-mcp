@@ -1,5 +1,5 @@
-import Foundation
 import EventKit
+import Foundation
 
 class EventStoreManager {
     static let shared = EventStoreManager()
