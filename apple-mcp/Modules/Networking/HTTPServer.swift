@@ -16,6 +16,8 @@ class HTTPServer {
     // Default bind address
     private let defaultBindAddress = "0.0.0.0"
 
+    var mcpHandler: ((NWConnection, Data) -> Void)?
+
     init(port: UInt16 = 8080) {
         self.port = port
     }
@@ -52,14 +54,29 @@ class HTTPServer {
 
     private func handleConnection(_ connection: NWConnection) {
         connection.receive(minimumIncompleteLength: 1, maximumLength: 2048) { [weak self] (data, _, isComplete, error) in
+            guard let self = self else { return }
+
             if let data = data, let requestString = String(data: data, encoding: .utf8) {
                 print("Received request: \(requestString)")
 
-                // Check if this is a GET request to /healthz
-                if let self = self, requestString.starts(with: "GET \(self.healthCheckPath)") {
-                    self.sendHealthzResponse(connection)
+                // Simple routing based on path
+                let lines = requestString.components(separatedBy: .newlines)
+                if let requestLine = lines.first {
+                    let components = requestLine.components(separatedBy: " ")
+                    if components.count > 1 {
+                        let path = components[1]
+                        if path == self.healthCheckPath {
+                            self.sendHealthzResponse(connection)
+                        } else if path == "/mcp" {
+                            self.mcpHandler?(connection, data)
+                        } else {
+                            self.sendNotFoundResponse(connection)
+                        }
+                    } else {
+                        self.sendNotFoundResponse(connection)
+                    }
                 } else {
-                    self?.sendNotFoundResponse(connection)
+                    self.sendNotFoundResponse(connection)
                 }
             } else if let error = error {
                 print("Error receiving data: \(error)")

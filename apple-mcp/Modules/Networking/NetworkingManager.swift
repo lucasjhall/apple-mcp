@@ -66,4 +66,8 @@ class NetworkingManager {
     var healthCheckEndpointString: String {
         return "http://\(defaultBindAddress):\(defaultPort)\(healthCheckPath)"
     }
+
+    func setMCPHandler(_ handler: @escaping (NWConnection, Data) -> Void) {
+        httpServer?.mcpHandler = handler
+    }
 }

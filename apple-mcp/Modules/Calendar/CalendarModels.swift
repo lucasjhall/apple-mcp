@@ -1,6 +1,6 @@
 import Foundation
 
-struct Event {
+struct Event: Codable {
     let identifier: String?
     let title: String
     let startDate: Date

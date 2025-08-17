@@ -1,51 +1,44 @@
-//
-//  apple_mcpApp.swift
-//  apple-mcp
-//
-//  Created by lucas on 8/16/25.
-//
-
 import SwiftUI
+import MCP
+import Logging
+import Network
 
 @main
 struct apple_mcpApp: App {
-    // State to manage the app lifecycle
-    @Environment(\.scenePhase) private var scenePhase
+    private let mcpManager: MCPManager
+    private let mcpTransport: MCPHTTPTransport
+    private let networkingManager: NetworkingManager
 
-    // Initialize the Networking Manager to handle HTTP server
-    private let networkingManager = NetworkingManager.shared
+    init() {
+        self.mcpManager = MCPManager()
+        self.mcpTransport = MCPHTTPTransport()
+        self.networkingManager = NetworkingManager.shared
 
-    var body: some Scene {
-        WindowGroup {
-            // Use our ContentView which includes the WelcomeView and server status
-            ContentView()
-                .onAppear {
-                    // Start the HTTP server when the view appears
-                    startHTTPServer()
-                }
+        // Start the HTTP server first
+        self.networkingManager.startHTTPServer()
+
+        // Set the mcpHandler on the http server
+        self.networkingManager.setMCPHandler { [weak self] connection, data in
+            guard let self = self else { return }
+            Task {
+                await self.mcpTransport.handle(connection: connection, data: data)
+            }
         }
-        .onChange(of: scenePhase) { newPhase in
-            switch newPhase {
-            case .active:
-                // App became active - ensure server is running
-                startHTTPServer()
-            case .background:
-                // App went to background - consider if you want to stop the server
-                // For a health check server, we'll keep it running even in background
-                break
-            case .inactive:
-                // App is inactive but might become active again soon
-                break
-            @unknown default:
-                break
+
+        // Start the MCP server
+        Task {
+            do {
+                try await self.mcpManager.start()
+                try await self.mcpManager.server.start(transport: self.mcpTransport)
+            } catch {
+                print("Failed to start MCP server: \(error)")
             }
         }
     }
 
-    // Helper method to start the HTTP server
-    private func startHTTPServer() {
-        if !networkingManager.isHTTPServerRunning {
-            networkingManager.startHTTPServer()
+    var body: some Scene {
+        WindowGroup {
+            ContentView()
         }
     }
 }
